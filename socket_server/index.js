@@ -100,20 +100,28 @@ wss.on('connection', function connection(ws) {
   
     ws.on('message', function incoming(message) {
 
-        const result = new Result({
-            bet_result: message.toString(),
-            created_at: Date.now(),
+      const json_message = JSON.parse(message);
+
+      const result = new Result({
+        bet_amount: json_message.amount,
+        bet_payout: json_message.payout,
+        bet_result: json_message.result,
+        is_profit_lost: parseFloat( json_message.payout ) < parseFloat( json_message.result ) ? true : false,
+        created_at: Date.now(),
+      });
+      
+      result.save()
+        .then((doc) => {
+          console.log(`=====================================
+          Amount : ${ json_message.amount },
+          Payout : ${ json_message.payout },
+          Result : ${ json_message.result },
+          State  : ${ parseFloat( json_message.payout ) < parseFloat( json_message.result ) ? 'Profit' : 'Lose'}
+          `)
+        })
+        .catch((err) => {
+          console.error('Error saving document:', err);
         });
-
-        result.save()
-            .then((doc) => {
-                console.log('Document saved:', doc);
-            })
-            .catch((err) => {
-                console.error('Error saving document:', err);
-            });
-
-      console.log('Received message:', message.toString());
       ws.send('Hello from server!');
     });
   

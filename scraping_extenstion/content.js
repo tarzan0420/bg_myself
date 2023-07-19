@@ -29,9 +29,20 @@ function main(event) {
     async function getResult(){
 
         const betResult = document.querySelector(".rocket-number span");
+        const inputFields = document.querySelectorAll(".input-control input");
         
+        // let reactProps = inputFields[0][Object.keys(inputFields[0]).filter(k => k.includes("Props"))[0]];
+        // reactProps.onChange({target: { value: '123'}});
+        
+                
         if (socket.readyState === WebSocket.OPEN) {
-            socket.send(betResult.textContent);
+            socket.send(
+                JSON.stringify({
+                    'amount' : inputFields[0].value,
+                    'payout' : inputFields[1].value,
+                    'result' : betResult.textContent
+                }
+            ))
         } else {
             console.error('Socket is not open');
         }
@@ -39,7 +50,7 @@ function main(event) {
         const betNumber = betResult.textContent;
         const betAmount = document.querySelectorAll('.button-group button');
 
-        if ( parseFloat( betNumber ) < 2 ){
+        if ( parseFloat( betNumber ) < parseFloat( inputFields[1].value ) ){
             betAmount[1].click();
             count++;
         }
